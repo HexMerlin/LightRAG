@@ -67,3 +67,5 @@ test_*
 
 # Cline files
 memory-bank/
+my_extensions/KNOWLEDGE_GRAPH_SPECIFICATION.md
+.cursor/rules/custom-instructions.mdc
