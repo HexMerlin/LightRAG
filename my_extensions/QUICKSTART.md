@@ -80,7 +80,7 @@ Note: The graph is not loaded automatically and requires selecting a label from 
 1. Stop the LightRAG server and Neo4j:
 
    ```bash
-   docker-compose down
+   docker-compose -f my_extensions/docker-compose.yml down
    ```
 
 2. Stop the PostgreSQL database:
