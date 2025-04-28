@@ -2,29 +2,25 @@
 Knowledge Graph Import Script for LightRAG
 
 This script imports a knowledge graph into the LightRAG system using both Neo4j for graph storage
-and PostgreSQL for vector and key-value storage. It performs a complete reset of all databases
-and working directories before import to ensure consistent results across multiple runs.
+and PostgreSQL for vector and key-value storage. It assumes that the databases and working directory
+are already clean. For cleaning, use the clean_all.py script.
 
 Steps:
 1. Load environment variables from .env file
-2. Clean all databases (Neo4j and PostgreSQL)
-3. Clean working directory (remove all files and subdirectories)
-4. Test Neo4j connection
-5. Load and validate knowledge graph from JSON file
-6. Display knowledge graph stats (entities, relationships, chunks)
-7. Create embedding function for Ollama
-8. Initialize LightRAG with Neo4JStorage for graph storage
-9. Import knowledge graph using LightRAG's ainsert_custom_kg method
-10. Verify Neo4j has been populated with entities and relationships
-11. Display entity types and relationship counts
+2. Load and validate knowledge graph from JSON file
+3. Initialize LightRAG with Neo4JStorage for graph storage
+4. Create embedding function for Ollama
+5. Import knowledge graph using LightRAG's ainsert_custom_kg method
+
 
 Usage:
     python my_extensions/import_kg.py
 
 Note:
     - Requires Neo4j and PostgreSQL to be running
-    - Requires Ollama server with bge-m3 embedding model
-    - Clears all existing data in databases and working directory
+    - Requires Ollama server with the specified embedding model
+    - For a clean start, run clean_all.py first
+    - Connection to Neo4j is verified during LightRAG initialization
 """
 
 import os
@@ -37,6 +33,10 @@ from dotenv import load_dotenv
 from lightrag import LightRAG
 from lightrag.utils import EmbeddingFunc
 from lightrag.llm.ollama import ollama_embed, ollama_model_complete
+
+# Optional: Clean all databases and storage before import
+# Comment out this line if you want to preserve existing data
+import clean_all; clean_all.main()
 
 # Apply nest_asyncio to handle nested event loops
 nest_asyncio.apply()
