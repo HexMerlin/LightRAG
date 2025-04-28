@@ -51,6 +51,7 @@ export const supportedFileTypes = {
     '.sh',
     '.c',
     '.cpp',
+    '.cs',
     '.py',
     '.java',
     '.js',
