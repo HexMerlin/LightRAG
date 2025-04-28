@@ -82,30 +82,3 @@ Note: The graph is not loaded automatically and requires selecting a label from 
    ```bash
    docker-compose -f my_extensions/PostgreSQL/docker-compose.yml down
    ```
-
-### Future planned extension: Import Your Own Custom Knowledge Graph
-
-To switch to using the full knowledge graph (when ready):
-
-1. Edit the `import_kg.py` file
-2. Comment out the mini graph path:
-
-   ```python
-   # KG_PATH = Path("C:/Dev/HexMerlin/clarity/json_output/knowledge_graph_MINI.json")  # Mini knowledge graph
-   ```
-
-3. Uncomment the full graph path:
-
-   ```python
-   KG_PATH = Path("C:/Dev/HexMerlin/clarity/json_output/knowledge_graph.json")      # Full knowledge graph
-   ```
-
-4. Run the script:
-
-   ```bash
-   python import_kg.py
-   ```
-
-This script reads the knowledge graph from the specified path and imports it into the default LightRAG storage directory (`./rag_storage`).
-
-For database setup details and troubleshooting, see [DATABASE_SETUP.md](./DATABASE_SETUP.md). 
