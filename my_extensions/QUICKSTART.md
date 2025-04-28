@@ -2,50 +2,52 @@
 
 ## Setup and Launch
 
-1. Open terminal and navigate to the project root:
+1. Ensure Docker Desktop is running
+
+2. Open terminal and navigate to the project root:
 
    ```bash
    cd C:\Dev\HexMerlin\LightRAG
    ```
 
-2. Activate the Python virtual environment:
+3. Activate the Python virtual environment:
 
    ```bash
    .\.venv\Scripts\activate
    ```
 
-3. Start PostgreSQL database (using Docker):
+4. Start PostgreSQL database (using Docker):
 
    ```bash
-   docker-compose -f PostgreSQL/docker-compose.yml up -d
+   docker-compose -f my_extensions/PostgreSQL/docker-compose.yml up -d
    ```
 
-4. For graph storage, ensure Neo4j is running:
+5. Make sure Ollama service is running and pull the embedding model:
 
    ```bash
-   docker run -d --name neo4j -p 7474:7474 -p 7687:7687 -e NEO4J_AUTH=neo4j/neo-neo- neo4j:latest
-   ```
-
-5. Make sure Ollama is running and pull the embedding model:
-
-   ```bash
+   # Start Ollama service if not already running
+   ollama serve
+   
+   # In a new terminal window, pull the embedding model
    ollama pull bge-m3:latest
    ```
 
-6. Import the miniature knowledge graph:
+6. Start LightRAG server and Neo4j using the main docker-compose file:
 
    ```bash
-   python import_kg.py
+   docker-compose -f my_extensions/docker-compose.yml up -d
    ```
 
-   Note: This script will clear any existing vector database files in the rag_storage directory.
+   This single command will:
+   - Start the Neo4j database
+   - Start the LightRAG server with the web UI
+   - Mount necessary data volumes and configuration files
 
-7. Start the LightRAG server:
+7. Import the miniature knowledge graph:
 
-   ```bash
-   python -m lightrag.api.lightrag_server
-   ```
+ TODO
 
+  
 8. Access the Web UI in your browser:
 
    ```html
@@ -69,19 +71,16 @@ Note: The graph is not loaded automatically and requires selecting a label from 
 
 ## Stopping the Server
 
-1. Press `Ctrl+C` in the terminal to stop the server
+1. Stop the LightRAG server and Neo4j:
+
+   ```bash
+   docker-compose down
+   ```
 
 2. Stop the PostgreSQL database:
 
    ```bash
-   docker-compose -f PostgreSQL/docker-compose.yml down
-   ```
-
-3. Stop the Neo4j database:
-
-   ```bash
-   docker stop neo4j
-   docker rm neo4j
+   docker-compose -f my_extensions/PostgreSQL/docker-compose.yml down
    ```
 
 ### Future planned extension: Import Your Own Custom Knowledge Graph

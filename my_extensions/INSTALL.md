@@ -5,16 +5,28 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
 ## Steps
 
 1. All terminal commands should be run from `C:\Dev\HexMerlin\LightRAG` unless stated otherwise.
-2. On GitHub, fork the LightRAG repository to your own account.
-3. Create a custom branch named `hex/main` to keep the `main` branch as a mirror of the official upstream repository.
-4. Make a clone of the forked repository to your local machine.
-5. Bind to the upstream repository:
+2. Create a Python virtual environment and activate it:
+
+   ```bash
+   python -m venv .venv
+   .\.venv\Scripts\activate
+   ```
+3. On GitHub, fork the LightRAG repository to your own account.
+4. Create a custom branch named `hex/main` to keep the `main` branch as a mirror of the official upstream repository.
+5. Make a clone of the forked repository to your local machine.
+6. Bind to the upstream repository:
 
    ```bash
    git remote add upstream https://github.com/HKUDS/LightRAG.git  
    ```
 
-6. **[CURSOR COMPATIBILITY ONLY]**  
+7. Install LightRAG server with the [api] option
+   
+   ```bash
+   pip install -e ".[api]"
+   ```
+
+8. **[CURSOR COMPATIBILITY ONLY]**  
    Create a symbolic link 'env' from the file '.env'.  
    This is necessary since Cursor cannot edit files starting with a dot.  
    Make sure there is a custom instruction for Cursor to always edit 'env' file instead of '.env'.  
@@ -24,7 +36,7 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
    mklink env .env
    ```
 
-7. **[CURSOR COMPATIBILITY ONLY]**
+9. **[CURSOR COMPATIBILITY ONLY]**
    Add Cursor special instructions as a rule to provide always:
 
    ```text
@@ -35,7 +47,7 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
    You cannot edit the file '.env' directly due to Cursor restrictions.
    ```
 
-8. Create a symbolic link for the shared file KNOWLEDGE_GRAPH_SPECIFICATION.md in the Clarity project so it is accessible in this project root LightRAG repository:
+10. Create a symbolic link for the shared file KNOWLEDGE_GRAPH_SPECIFICATION.md in the Clarity project so it is accessible in this project root LightRAG repository:
 
    ```bash
    mklink my_extensions\KNOWLEDGE_GRAPH_SPECIFICATION.md ..\..\clarity\KNOWLEDGE_GRAPH_SPECIFICATION.md
@@ -43,8 +55,4 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
 
    Add the file `my_extensions\KNOWLEDGE_GRAPH_SPECIFICATION.md` to `.gitignore` (it is version controlled by the Clarity project).
 
-9. Create a Python virtual environment:
 
-   ```bash
-   python -m venv .venv
-   ```
