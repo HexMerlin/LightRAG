@@ -44,21 +44,49 @@ nest_asyncio.apply()
 # Load environment variables
 load_dotenv()
 
-# Get Neo4j connection parameters from env
+# Get configuration from environment variables
+# Neo4j Configuration
 neo4j_uri = os.getenv("NEO4J_URI", "bolt://localhost:7687")
-# Always use localhost when running from host machine
+# When running from host machine, use localhost instead of container name
 neo4j_uri = neo4j_uri.replace("neo4j:", "localhost:")
 os.environ["NEO4J_URI"] = neo4j_uri
+neo4j_username = os.getenv("NEO4J_USERNAME", "neo4j")
+neo4j_password = os.getenv("NEO4J_PASSWORD", "neo-neo-")
+
+# PostgreSQL Configuration
+postgres_host = os.getenv("POSTGRES_HOST", "lightrag_postgres")
+# When running from host machine, use localhost instead of container name
+postgres_host = "localhost" if postgres_host == "lightrag_postgres" else postgres_host
+postgres_port = int(os.getenv("POSTGRES_PORT", "5432"))
+postgres_user = os.getenv("POSTGRES_USER", "postgres")
+postgres_password = os.getenv("POSTGRES_PASSWORD", "postgres")
+postgres_database = os.getenv("POSTGRES_DATABASE", "lightrag")
+
+# Storage Configuration
+kv_storage = os.getenv("LIGHTRAG_KV_STORAGE", "PGKVStorage")
+vector_storage = os.getenv("LIGHTRAG_VECTOR_STORAGE", "PGVectorStorage")
+graph_storage = os.getenv("LIGHTRAG_GRAPH_STORAGE", "Neo4JStorage")
+doc_status_storage = os.getenv("LIGHTRAG_DOC_STATUS_STORAGE", "PGDocStatusStorage")
+
+# Ollama Configuration
+ollama_host = os.getenv("LLM_BINDING_HOST", "http://host.docker.internal:11434")
+# When running from host machine, use localhost instead of host.docker.internal
+ollama_host = ollama_host.replace("host.docker.internal", "localhost")
+embedding_model = os.getenv("EMBEDDING_MODEL", "bge-m3:latest")
+llm_model = os.getenv("LLM_MODEL", "llama3.2:latest")
+
+# LLM Configuration
+timeout = int(os.getenv("TIMEOUT", "150"))
+temperature = float(os.getenv("TEMPERATURE", "0.5"))
+max_async = int(os.getenv("MAX_ASYNC", "4"))
+max_tokens = int(os.getenv("MAX_TOKENS", "32768"))
+enable_llm_cache = os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true"
 
 # Knowledge graph file path
 kg_file = "C:/Dev/HexMerlin/clarity/json_output/knowledge_graph_MINI.json"
 
 # Working directory for LightRAG
 working_dir = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "rag_storage")))
-
-# Get embedding and LLM model from env
-embedding_model = os.getenv("EMBEDDING_MODEL", "nomic-embed-text")
-llm_model = os.getenv("LLM_MODEL", "llama2")
 
 def load_knowledge_graph(file_path):
     try:
@@ -85,7 +113,7 @@ async def async_main():
             return await ollama_embed(
                 texts,
                 embed_model=embedding_model,
-                host="http://127.0.0.1:11434"
+                host=ollama_host
             )
         
         embedding_func = EmbeddingFunc(
@@ -100,17 +128,34 @@ async def async_main():
         
         # Initialize LightRAG
         print(f"Initializing LightRAG with working directory: {working_dir}")
+        
+        # Set PostgreSQL environment variables for LightRAG
+        os.environ["POSTGRES_HOST"] = postgres_host
+        os.environ["POSTGRES_PORT"] = str(postgres_port)
+        os.environ["POSTGRES_USER"] = postgres_user
+        os.environ["POSTGRES_PASSWORD"] = postgres_password
+        os.environ["POSTGRES_DATABASE"] = postgres_database
+        
         lightrag = LightRAG(
             working_dir=str(working_dir),
             embedding_func=embedding_func,
             llm_model_func=ollama_model_complete,
             llm_model_name=llm_model,
-            llm_model_max_token_size=32768,
+            llm_model_max_token_size=max_tokens,
             llm_model_kwargs={
-                "host": "http://127.0.0.1:11434",
-                "options": {"num_ctx": 32768}
+                "host": ollama_host,
+                "options": {
+                    "num_ctx": max_tokens,
+                    "temperature": temperature,
+                    "timeout": timeout
+                }
             },
-            auto_manage_storages_states=False
+            auto_manage_storages_states=False,
+            kv_storage=kv_storage,
+            vector_storage=vector_storage,
+            graph_storage=graph_storage,
+            doc_status_storage=doc_status_storage,
+            enable_llm_cache=enable_llm_cache
         )
         
         # Initialize storages
