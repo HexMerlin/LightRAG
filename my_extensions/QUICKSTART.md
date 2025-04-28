@@ -43,7 +43,7 @@
    - Start the LightRAG server with the web UI
    - Mount necessary data volumes and configuration files
 
-7. Import the miniature knowledge graph:
+7. Import miniature knowledge graph and other input data in standard way:
 
  TODO
 
