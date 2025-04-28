@@ -39,15 +39,21 @@
    ```
 
    This single command will:
-   - Start the Neo4j database
+   - Start the Neo4j database with credentials from env file
    - Start the LightRAG server with the web UI
    - Mount necessary data volumes and configuration files
 
-7. Import miniature knowledge graph and other input data in standard way:
+7. Import the knowledge graph into LightRAG:
 
- TODO
+   ```bash
+   python my_extensions/import_kg.py
+   ```
 
-  
+   This script will:
+   - Load the knowledge graph from the JSON file
+   - Import the knowledge graph into LightRAG
+   - Create embeddings for all entities, relationships, and chunks
+
 8. Access the Web UI in your browser:
 
    ```html

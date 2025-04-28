@@ -26,7 +26,13 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
    pip install -e ".[api]"
    ```
 
-8. **[CURSOR COMPATIBILITY ONLY]**  
+8. Install dependencies for knowledge graph import:
+   
+   ```bash
+   python my_extensions/install_dependencies.py
+   ```
+
+9. **[CURSOR COMPATIBILITY ONLY]**  
    Create a symbolic link 'env' from the file '.env'.  
    This is necessary since Cursor cannot edit files starting with a dot.  
    Make sure there is a custom instruction for Cursor to always edit 'env' file instead of '.env'.  
@@ -36,23 +42,23 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
    mklink env .env
    ```
 
-9. **[CURSOR COMPATIBILITY ONLY]**
-   Add Cursor special instructions as a rule to provide always:
+10. **[CURSOR COMPATIBILITY ONLY]**
+    Add Cursor special instructions as a rule to provide always:
 
-   ```text
-   The folder 'my_extensions' is the folder for all files that are not part of the original LightRAG distribution.
-   All new files should be created in the folder 'my_extensions' for separatation, to the most possible extent.
+    ```text
+    The folder 'my_extensions' is the folder for all files that are not part of the original LightRAG distribution.
+    All new files should be created in the folder 'my_extensions' for separatation, to the most possible extent.
 
-   If you want to edit the file '.env' use the file 'env' instead, which is a symbolic link to the file '.env'.
-   You cannot edit the file '.env' directly due to Cursor restrictions.
-   ```
+    If you want to edit the file '.env' use the file 'env' instead, which is a symbolic link to the file '.env'.
+    You cannot edit the file '.env' directly due to Cursor restrictions.
+    ```
 
-10. Create a symbolic link for the shared file KNOWLEDGE_GRAPH_SPECIFICATION.md in the Clarity project so it is accessible in this project root LightRAG repository:
+11. Create a symbolic link for the shared file KNOWLEDGE_GRAPH_SPECIFICATION.md in the Clarity project so it is accessible in this project root LightRAG repository:
 
-   ```bash
-   mklink my_extensions\KNOWLEDGE_GRAPH_SPECIFICATION.md ..\..\clarity\KNOWLEDGE_GRAPH_SPECIFICATION.md
-   ```
+    ```bash
+    mklink my_extensions\KNOWLEDGE_GRAPH_SPECIFICATION.md ..\..\clarity\KNOWLEDGE_GRAPH_SPECIFICATION.md
+    ```
 
-   Add the file `my_extensions\KNOWLEDGE_GRAPH_SPECIFICATION.md` to `.gitignore` (it is version controlled by the Clarity project).
+    Add the file `my_extensions\KNOWLEDGE_GRAPH_SPECIFICATION.md` to `.gitignore` (it is version controlled by the Clarity project).
 
 
