@@ -20,11 +20,13 @@ This file outlines the steps for setting up the LightRAG environment on a new ma
    git remote add upstream https://github.com/HKUDS/LightRAG.git  
    ```
 
-7. Install LightRAG server with the [api] option
+7.  > **Note:** This step is only needed if you plan to run LightRAG directly on your machine without Docker. If you're using Docker (via docker-compose), you can skip this step as the Docker containers will handle the installation internally.
+   
+   Install LightRAG server with the [api] option
    
    ```bash
    pip install -e ".[api]"
-   ```
+   ```  
 
 8. Install dependencies for knowledge graph import:
    
