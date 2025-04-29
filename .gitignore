@@ -7,14 +7,12 @@ __pycache__/
 *.tar.gz
 *.ini
 
-#Visual Studio
-.vs/
-
 # Virtual Environment
 .venv/
 env/
 venv/
-
+*.env*
+.env_example
 
 # Build / Distribution
 dist/
@@ -69,6 +67,3 @@ test_*
 
 # Cline files
 memory-bank/
-my_extensions/KNOWLEDGE_GRAPH_SPECIFICATION.md
-.cursor/rules/custom-instructions.mdc
-/.vs
