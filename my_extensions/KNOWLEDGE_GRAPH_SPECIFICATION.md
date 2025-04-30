@@ -1,0 +1,1 @@
+../../clarity/KNOWLEDGE_GRAPH_SPECIFICATION.md
