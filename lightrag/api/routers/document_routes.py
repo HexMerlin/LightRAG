@@ -357,6 +357,7 @@ class DocumentManager:
             ".sh",  # Shell scripts
             ".c",  # C source code
             ".cpp",  # C++ source code
+            ".cs",  # C# source code
             ".py",  # Python source code
             ".java",  # Java source code
             ".js",  # JavaScript source code
@@ -437,6 +438,7 @@ async def pipeline_enqueue_file(rag: LightRAG, file_path: Path) -> bool:
                 | ".sh"
                 | ".c"
                 | ".cpp"
+                | ".cs"
                 | ".py"
                 | ".java"
                 | ".js"
