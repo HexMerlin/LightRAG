@@ -346,7 +346,7 @@ def priority_limit_async_func_call(max_size: int, max_queue_size: int = 1000):
                         logger.error(f"limit_async: Critical error in worker: {str(e)}")
                         await asyncio.sleep(0.1)  # Prevent high CPU usage
             finally:
-                logger.warning("limit_async: Worker exiting")
+                logger.debug("limit_async: Worker exiting")
 
         async def health_check():
             """Periodically check worker health status and recover"""
@@ -379,7 +379,7 @@ def priority_limit_async_func_call(max_size: int, max_queue_size: int = 1000):
             except Exception as e:
                 logger.error(f"limit_async: Error in health check: {str(e)}")
             finally:
-                logger.warning("limit_async: Health check task exiting")
+                logger.debug("limit_async: Health check task exiting")
                 initialized = False
 
         async def ensure_workers():
@@ -1660,6 +1660,9 @@ def normalize_extracted_info(name: str, is_entity=False) -> str:
     3. Preserve spaces within English text and numbers
     4. Replace Chinese parentheses with English parentheses
     5. Replace Chinese dash with English dash
+    6. Remove English quotation marks from the beginning and end of the text
+    7. Remove English quotation marks in and around chinese
+    8. Remove Chinese quotation marks
 
     Args:
         name: Entity name to normalize

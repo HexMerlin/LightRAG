@@ -6,7 +6,7 @@ import configparser
 import os
 import warnings
 from dataclasses import asdict, dataclass, field
-from datetime import datetime
+from datetime import datetime, timezone
 from functools import partial
 from typing import (
     Any,
@@ -756,8 +756,8 @@ class LightRAG:
                 "content": content_data["content"],
                 "content_summary": get_content_summary(content_data["content"]),
                 "content_length": len(content_data["content"]),
-                "created_at": datetime.now().isoformat(),
-                "updated_at": datetime.now().isoformat(),
+                "created_at": datetime.now(timezone.utc).isoformat(),
+                "updated_at": datetime.now(timezone.utc).isoformat(),
                 "file_path": content_data[
                     "file_path"
                 ],  # Store file path in document status
@@ -840,7 +840,7 @@ class LightRAG:
                     {
                         "busy": True,
                         "job_name": "Default Job",
-                        "job_start": datetime.now().isoformat(),
+                        "job_start": datetime.now(timezone.utc).isoformat(),
                         "docs": 0,
                         "batchs": 0,  # Total number of files to be processed
                         "cur_batch": 0,  # Number of files already processed
@@ -958,7 +958,9 @@ class LightRAG:
                                             "content_summary": status_doc.content_summary,
                                             "content_length": status_doc.content_length,
                                             "created_at": status_doc.created_at,
-                                            "updated_at": datetime.now().isoformat(),
+                                            "updated_at": datetime.now(
+                                                timezone.utc
+                                            ).isoformat(),
                                             "file_path": file_path,
                                         }
                                     }
@@ -992,10 +994,14 @@ class LightRAG:
 
                         except Exception as e:
                             # Log error and update pipeline status
-                            error_msg = f"Failed to extrat document {doc_id}: {traceback.format_exc()}"
+                            logger.error(traceback.format_exc())
+                            error_msg = f"Failed to extrat document {current_file_number}/{total_files}: {file_path}"
                             logger.error(error_msg)
                             async with pipeline_status_lock:
                                 pipeline_status["latest_message"] = error_msg
+                                pipeline_status["history_messages"].append(
+                                    traceback.format_exc()
+                                )
                                 pipeline_status["history_messages"].append(error_msg)
 
                                 # Cancel other tasks as they are no longer meaningful
@@ -1008,6 +1014,10 @@ class LightRAG:
                                     if not task.done():
                                         task.cancel()
 
+                            # Persistent llm cache
+                            if self.llm_response_cache:
+                                await self.llm_response_cache.index_done_callback
+
                             # Update document status to failed
                             await self.doc_status.upsert(
                                 {
@@ -1018,13 +1028,15 @@ class LightRAG:
                                         "content_summary": status_doc.content_summary,
                                         "content_length": status_doc.content_length,
                                         "created_at": status_doc.created_at,
-                                        "updated_at": datetime.now().isoformat(),
+                                        "updated_at": datetime.now(
+                                            timezone.utc
+                                        ).isoformat(),
                                         "file_path": file_path,
                                     }
                                 }
                             )
 
-                    # Semphore was released here
+                    # Semphore released, concurrency controlled by graph_db_lock in merge_nodes_and_edges instead
 
                     if file_extraction_stage_ok:
                         try:
@@ -1053,7 +1065,9 @@ class LightRAG:
                                         "content_summary": status_doc.content_summary,
                                         "content_length": status_doc.content_length,
                                         "created_at": status_doc.created_at,
-                                        "updated_at": datetime.now().isoformat(),
+                                        "updated_at": datetime.now(
+                                            timezone.utc
+                                        ).isoformat(),
                                         "file_path": file_path,
                                     }
                                 }
@@ -1070,11 +1084,19 @@ class LightRAG:
 
                         except Exception as e:
                             # Log error and update pipeline status
-                            error_msg = f"Merging stage failed in document {doc_id}: {traceback.format_exc()}"
+                            logger.error(traceback.format_exc())
+                            error_msg = f"Merging stage failed in document {current_file_number}/{total_files}: {file_path}"
                             logger.error(error_msg)
                             async with pipeline_status_lock:
                                 pipeline_status["latest_message"] = error_msg
+                                pipeline_status["history_messages"].append(
+                                    traceback.format_exc()
+                                )
                                 pipeline_status["history_messages"].append(error_msg)
+
+                            # Persistent llm cache
+                            if self.llm_response_cache:
+                                await self.llm_response_cache.index_done_callback
 
                             # Update document status to failed
                             await self.doc_status.upsert(

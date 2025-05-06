@@ -211,6 +211,11 @@ async def _handle_single_relationship_extraction(
     # Normalize source and target entity names
     source = normalize_extracted_info(source, is_entity=True)
     target = normalize_extracted_info(target, is_entity=True)
+    if source == target:
+        logger.debug(
+            f"Relationship source and target are the same in: {record_attributes}"
+        )
+        return None
 
     edge_description = clean_str(record_attributes[3])
     edge_description = normalize_extracted_info(edge_description)
@@ -311,6 +316,7 @@ async def _merge_nodes_then_upsert(
         description=description,
         source_id=source_id,
         file_path=file_path,
+        created_at=int(time.time()),
     )
     await knowledge_graph_inst.upsert_node(
         entity_name,
@@ -330,6 +336,9 @@ async def _merge_edges_then_upsert(
     pipeline_status_lock=None,
     llm_response_cache: BaseKVStorage | None = None,
 ):
+    if src_id == tgt_id:
+        return None
+
     already_weights = []
     already_source_ids = []
     already_description = []
@@ -422,6 +431,7 @@ async def _merge_edges_then_upsert(
                     "description": description,
                     "entity_type": "UNKNOWN",
                     "file_path": file_path,
+                    "created_at": int(time.time()),
                 },
             )
 
@@ -465,6 +475,7 @@ async def _merge_edges_then_upsert(
             keywords=keywords,
             source_id=source_id,
             file_path=file_path,
+            created_at=int(time.time()),
         ),
     )
 
@@ -528,7 +539,7 @@ async def merge_nodes_and_edges(
 
     # Merge nodes and edges
     # Use graph database lock to ensure atomic merges and updates
-    graph_db_lock = get_graph_db_lock(enable_logging=True)
+    graph_db_lock = get_graph_db_lock(enable_logging=False)
     async with graph_db_lock:
         async with pipeline_status_lock:
             log_message = (
@@ -789,7 +800,7 @@ async def extract_entities(
         processed_chunks += 1
         entities_count = len(maybe_nodes)
         relations_count = len(maybe_edges)
-        log_message = f"Chk {processed_chunks} of {total_chunks} extracted {entities_count} Ent + {relations_count} Rel"
+        log_message = f"Chunk {processed_chunks} of {total_chunks} extracted {entities_count} Ent + {relations_count} Rel"
         logger.info(log_message)
         if pipeline_status is not None:
             async with pipeline_status_lock:
@@ -1455,7 +1466,12 @@ async def _get_node_data(
         logger.warning("Some nodes are missing, maybe the storage is damaged")
 
     node_datas = [
-        {**n, "entity_name": k["entity_name"], "rank": d}
+        {
+            **n,
+            "entity_name": k["entity_name"],
+            "rank": d,
+            "created_at": k.get("created_at"),
+        }
         for k, n, d in zip(results, node_datas, node_degrees)
         if n is not None
     ]  # what is this text_chunks_db doing.  dont remember it in airvx.  check the diagram.
@@ -1774,7 +1790,7 @@ async def _get_edge_data(
                 "src_id": k["src_id"],
                 "tgt_id": k["tgt_id"],
                 "rank": edge_degrees_dict.get(pair, k.get("rank", 0)),
-                "created_at": k.get("__created_at__", None),
+                "created_at": k.get("created_at", None),
                 **edge_props,
             }
             edge_datas.append(combined)
@@ -1820,7 +1836,7 @@ async def _get_edge_data(
         ]
     ]
     for i, e in enumerate(edge_datas):
-        created_at = e.get("created_at", "Unknown")
+        created_at = e.get("created_at", "UNKNOWN")
         # Convert timestamp to readable format
         if isinstance(created_at, (int, float)):
             created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(created_at))
@@ -1847,7 +1863,7 @@ async def _get_edge_data(
         ["id", "entity", "type", "description", "rank", "created_at", "file_path"]
     ]
     for i, n in enumerate(use_entities):
-        created_at = n.get("created_at", "Unknown")
+        created_at = n.get("created_at", "UNKNOWN")
         # Convert timestamp to readable format
         if isinstance(created_at, (int, float)):
             created_at = time.strftime("%Y-%m-%d %H:%M:%S", time.localtime(created_at))
