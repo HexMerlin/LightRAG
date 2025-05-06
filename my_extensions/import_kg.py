@@ -83,7 +83,8 @@ max_tokens = int(os.getenv("MAX_TOKENS", "32768"))
 enable_llm_cache = os.getenv("ENABLE_LLM_CACHE", "true").lower() == "true"
 
 # Knowledge graph file path
-kg_file = "C:/Dev/HexMerlin/clarity/json_output/knowledge_graph_MINI.json"
+#kg_file = "C:/Dev/HexMerlin/clarity/json_output/knowledge_graph_MINI.json"
+kg_file = "C:/Dev/HexMerlin/clarity/json_output/knowledge_graph.json"
 
 # Working directory for LightRAG
 working_dir = Path(os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "rag_storage")))
